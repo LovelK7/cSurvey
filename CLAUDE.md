@@ -13,9 +13,11 @@ cSurvey is Windows desktop cave-survey software (VB.NET WinForms, .NET Framework
 | `cave_model/` | Native C++/CLI mesh generator (`DNetCMCave`) used by the 3D "Holos" viewer. |
 | `HelixToolkit.Wpf.cSurveySpecialized/` | 3-file HelixToolkit fork (terrain from in-memory elevation instead of .bt files). |
 | `cSurveyDiagnostics/`, `cSurveyUpdateVersion/` | Crash reporting; build version stamper (post-build step). |
-| `dev/literature/` | Manuals: `csurvey.it.en.pdf` (machine-translated English — see translation traps below), `cSurvey_RAD_Paride.pdf` (tutorial). |
-| `dev/example/` | `Demo Survey/survey_1..6.csz` (progressive tutorial stages) and `buless.csz` (real imported survey — PocketTopo-derived per its `import_source` stamps, 267/316 shots are splays, LRUD fields all zero — structurally representative of phone-surveyed data). |
-| `dev/docs/` | **The AI-oriented knowledge base generated for this fork.** |
+| `cSurveyPC/data/` | **The real, tracked test corpus** — nine `.csz` surveys. See "Test corpus" below; it is centerline-only, which matters. |
+| `dev/literature/` | **Gitignored — absent from a fresh clone.** Manuals: `csurvey.it.en.pdf` (machine-translated English — see translation traps below), `cSurvey_RAD_Paride.pdf` (tutorial). |
+| `dev/example/` | **Gitignored — absent from a fresh clone, and cited by stale paths throughout `dev/docs/`.** The docs' `dev/example/buless.csz` is really `cSurveyPC/data/buless_test1.csz`. |
+| `dev/docs/` | **The AI-oriented knowledge base generated for this fork.** Start at [dev/docs/roadmap-decisions.md](dev/docs/roadmap-decisions.md) for current project state and what's actually being worked on. |
+| `dev/tasks/` | Task briefs for delegated work (self-contained; a fresh session can execute one without prior context). |
 
 ### Dead code traps (do not edit these)
 - `cSurveyPC/frmMain.vb` (25k lines) is a **legacy duplicate** of `frmMain2.vb` and is NOT in the .vbproj. `frmMain2.vb` is the real main window.
@@ -57,7 +59,7 @@ cSurvey is Windows desktop cave-survey software (VB.NET WinForms, .NET Framework
 
 shot = `cSegment` · station = `cTrigPoint` (derived from shot names) · splay = `cSegment` with `Splay=True` (auto-named `X(n)`) · LRUD = left/right/up/down passage half-widths at a station · centerline/plot = computed shot lines (`cPlotPlan`/`cPlotProfile`) · design = a drawable map view (`cDesignPlan`/`cDesignProfile`) · extended elevation = the unrolled profile view · x-section = `cItemCrossSection` + `cDesignCrossSection` · warping = auto-morph of bound drawing points after recalc · session = survey trip (`cSession`, carries declination + grade) · cave/branch = organizational tree (`cCaveInfo`/`cCaveInfoBranch`) · origin = the station fixed at (0,0,0) · therion = external calc/typesetting engine · scrap = a therion drawing unit (.th2)
 
-**Machine-translation traps in the English manual** (`dev/literature/csurvey.it.en.pdf`): "jokes" = shots, "cornerstones"/"strongholds" = stations, "plant" = plan, "polygonal" = centerline, "relief" = survey. The manual describes a 2011 build; trust the code and dev/docs over it.
+**Machine-translation traps in the English manual** (`dev/literature/csurvey.it.en.pdf` — gitignored, may not be present): "jokes" = shots, "cornerstones"/"strongholds" = stations, "plant" = plan, "polygonal" = centerline, "relief" = survey. The manual describes a 2011 build; trust the code and dev/docs over it.
 
 ## Invariants and gotchas (violate these and things break silently)
 
@@ -94,4 +96,15 @@ shot = `cSegment` · station = `cTrigPoint` (derived from shot names) · splay =
 - VB.NET style of the codebase: Hungarian-ish prefixes (`o` object, `s` string, `i` int/enum, `b` bool), `p*` for private subs, `cXxx` class files. Match it.
 - UI strings go through resx localization (it/ru/en variants exist per form); don't hard-code user-facing text.
 - Serialization changes must preserve backward compatibility: add attributes with defaults, bump the version const and extend the upgrade chain in `cSurvey.Load` only when unavoidable.
-- Test surveys: use `dev/example/` files; `buless.csz` is the realistic phone-surveyed case (PocketTopo-derived, splay-heavy, no LRUD).
+
+## Test corpus (`cSurveyPC/data/`, nine tracked `.csz`)
+
+Verified by direct inspection 2026-07-16. **The whole corpus is centerline-only** — pick a fixture by what you're testing:
+
+- **`test extend 2.csz`** — the **only file in the repo containing a real drawing item**. Sole ground truth for the `<points data>` / `S<guid>` binding encoding. Use for anything sketch-related.
+- **`test splay1.csz`** (7 shots / 4 splays / 56 KB) — smallest file with splays; best fast fixture for splay machinery.
+- **`test lrud.CSZ`** (4 shots, 3 with LRUD) — the only focused LRUD case. Note TopoDroid *never* produces LRUD, so this exercises a path phone data doesn't reach.
+- **`buless_test1.csz`** (318 shots / 267 splays) — PocketTopo-derived. Representative of phone-surveyed **centerline** (splay-heavy, LRUD zero) and the only multi-entry zip (46 cliparts + 2 MB surface DEM), so it's the right container/asset test. **Trap: it has zero design items** — all 7 plan layers empty. Looks rich, is not. Never use it as a drawing fixture.
+- **`snow_2015_yanina.CSZ`** (1496 shots / 1176 splays) — scale/perf case.
+
+**No file in the repo is a real TopoDroid export** (none carries `creatid="topodroid"`). Everything the docs say about what TopoDroid *emits* is reconstructed from cSurvey's reader code, never captured from a phone — treat it as informed inference until a real export validates it. **A raw TopoDroid `.csx` stores sketch items as flat `<item>` children under `<plan>`, not the `<layers>/<layer>/<items>` structure native files use** — tooling that counts only the native shape reports zero items for a file with a full sketch.

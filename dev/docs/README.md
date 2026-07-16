@@ -28,6 +28,10 @@ Start with [`CLAUDE.md`](../../CLAUDE.md) at the repo root for the one-page orie
 12. [auto-sketch-feasibility.md](auto-sketch-feasibility.md) — inventory of every facility that generates drawing geometry from measurement data, and concrete pipeline designs for "TopoDroid zip in → finished plan+profile sketch out" with honest quality expectations.
 13. [mcp-blueprint.md](mcp-blueprint.md) — the actionable MCP server design: architecture choice, tool list, staged implementation roadmap, risks.
 
+### Project state (not codebase docs — read these to know what's actually being done)
+14. [roadmap-decisions.md](roadmap-decisions.md) — **dated record of strategy decisions and the findings behind them.** Which pipeline is targeted and why, what's verified vs still assumed, the current critical path, and corrections to the docs below. **Start here if you're picking up the automation work.**
+    - Task briefs for delegated work live in [dev/tasks/](../tasks/).
+
 ## Verification status
 
 Every doc was written by a dedicated exploration agent with mandatory code grounding, then passed an independent adversarial fact-check that verified the 12–18 most load-bearing claims against the source and fixed errors in place. Corrections applied per doc: data-model 9, calculation 6, topodroid-import 3, drawing-engine 7, rendering 6, exports 4, ui-map 2, automation 4, 3d-surface 1, human-workflow 7, end-to-end-trace 6, auto-sketch-feasibility 3, mcp-blueprint 8. Claims the checkers could not fully establish are marked `(unverified)` or `(inferred)` inline — treat those with appropriate suspicion.
