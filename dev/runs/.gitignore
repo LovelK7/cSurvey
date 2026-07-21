@@ -1,0 +1,6 @@
+# Survey snapshots contain the user's cave data and can be large — keep them
+# local. The JSON reports + RUNLOG.md are the tracked ground truth.
+*.csz
+*.CSZ
+*.csx
+*.CSX

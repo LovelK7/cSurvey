@@ -4,6 +4,30 @@ A running record of strategy decisions for the automation goal, and the findings
 
 ---
 
+## 2026-07-19 — Pipeline A confirmed on real data; environment gaps closed; instrumented run staged
+
+### What changed since 2026-07-16
+
+Three of the five critical-path items landed, and the biggest open question is answered:
+
+1. **The first real TopoDroid export exists** (critical path #2): `dev/example/ponor_rupa_babi_pod_kucu-1p.csx` — TopoDroid 6.4.29, exported 2026-07-18. **Gitignored — invisible to git history**; SHA256 recorded in the run log. It carries **34 flat sketch items** (12 plan + 22 profile) → **the surveyor draws on the phone → Pipeline A confirmed on data**, no longer just on the user's word. Bonus finding: the `-1p` (plan) and `-1s` (profile) exports are **byte-identical** — TopoDroid's csx always contains both designs; one export suffices.
+2. **The Stage 0 inspector is built and verified** (critical path #3): `dev/tools/inspect_survey.py` (+ README). Reproduces the nine-file corpus baseline exactly, counts both sketch shapes, decodes datarow provenance stamps, and now carries a per-design geometry digest (bbox + coord-sum) so warping is diff-visible. Found `import_source="pockettopo"` stamps in `buless_test1.csz` — its PocketTopo provenance is now file-confirmed, not inferred.
+3. **The dev environment finding is obsolete** (was #2 of "findings that reordered the plan"): cSurvey **is now installed and configured** on this machine (`C:\csurvey64\cSurveyPC.exe`, release binary 2025-12-10, x64; full `HKCU\Software\Cepelabs\cSurvey` key) and **therion is installed** with `therion.path` set (critical path #1). Version skew vs this source tree is still unmeasured — the staged run's prediction 8 measures it.
+
+### Docs-vs-reality scorecard (first contact)
+
+No contradictions. Upgraded from inference to fact: flat `<item>` children under `<plan>`/`<profile>` with therion symbol names (incl. subtype `wall:presumed` and `user`); `points@data` = `X Y B X Y …`, %.2f, no `S` bindings; segment ids sequential on legs / **empty on splays** — the duplicate-id reality behind `OFRegenerateSegmentsID`. New details the docs didn't predict: TopoDroid pre-names splay stations (`0(0)`) and stamps `exclude="1"` itself; LRUD written as explicit zeros; `creatdate` is date-only.
+
+### Decision — run the instrumented import
+
+Run the **instrumented import** next — protocol at [dev/tasks/pipeline-a-instrumented-run.md](../tasks/pipeline-a-instrumented-run.md), run state in [dev/runs/2026-07-19-ponor-import/RUNLOG.md](../runs/2026-07-19-ponor-import/RUNLOG.md) (step-00 done; steps 01-03 need the user at the UI). It tests the save-after-each-step protocol itself, produces the first ground-truth diff of the fix-up chain, and measures binary/source skew. After it: the **reflection hypothesis** (critical path #4) is the highest-leverage next experiment — headless Pipeline A with no build.
+
+### Outcome (same day) — run complete, Pipeline A validated end-to-end
+
+The run executed in full: **import 10/10 predictions confirmed (zero contradictions, zero version skew — the 2025-12 binary writes file version 1.14), binding real (all 473 points bound), warping real (shot edit moved both designs' bound sketches)**. Full evidence in the RUNLOG. Two limitations surfaced, both fixable *before* import without touching cSurvey: (1) point symbols outside `SignEnum` become irrecoverable Undefined X-boxes (therion name discarded at conversion — `cImportTopoDroidHelper.vb:380-398`); (2) wall-stroke orientation is not normalized, so clockwise strokes invert the cave-border fill (in-app fix: "Revert sequences", `frmMain2.vb:18420`). Follow-up brief: [dev/tasks/tdx-symbol-mapping-brief.md](../tasks/tdx-symbol-mapping-brief.md) (symbol-zoo experiment → mapping matrix → csx pre-processor → TDX palette). TopoDroid manuals now in `dev/literature/topodroid/`; the user's TDX handoff folder is `G:\My Drive\Share\TDX` (phone syncs there — the natural watch-folder for future automation). ⚠ The pristine raw export was lost in a post-run file move (recovery pending; SHA256 in RUNLOG) — future runs snapshot the raw input into the run dir at step-00.
+
+---
+
 ## 2026-07-16 — Commit to Pipeline A; probe the two untested gates
 
 ### Decision

@@ -1,0 +1,47 @@
+{
+  "_doc": [
+    "User-editable TDX -> cSurvey symbol mapping, consumed by preprocess_tdx_csx.py.",
+    "Browse dev/tools/signs-catalog.html (regenerate with make_signs_catalog.py)",
+    "to SEE every point glyph next to its app (Italian) name and enum identity.",
+    "",
+    "points: key = TDX name (lowercase). Actions:",
+    "  {\"to\": \"<name>\"}    rename; target must resolve to a SignEnum member",
+    "                        after dashes are stripped (e.g. soda-straw -> SodaStraw),",
+    "                        or be 'label'. Pick glyph-backed targets from the catalog.",
+    "  {\"label\": \"<text>\"} convert to a text label with that text.",
+    "  {\"leave\": true}      explicitly keep as-is (suppresses the warning).",
+    "lines: same, but 'to' targets are ONLY the fixed import vocabulary",
+    "  (see catalog bottom table): wall, wall:presumed, presumed, border,",
+    "  overhang, pit, chimney, slope, floor-meander, ceiling-meander,",
+    "  rock-border, water-flow, section.",
+    "areas: 'to' targets: water, sand, clay, debris, blocks, pebbles.",
+    "generic.strip_line_subtypes: 'base:sub' -> 'base' for known line bases",
+    "  (wall:presumed exempt). generic.strip_area_suffix: 'x-area' -> 'x'",
+    "  for known area bases."
+  ],
+  "points": {
+    "debris": { "to": "blocks" },
+    "water-drip": { "to": "waterfall" },
+    "mud": { "to": "clay" },
+    "tree-trunk": { "to": "vegetable-debris" },
+    "danger": { "label": "!" },
+    "minus": { "label": "-" },
+    "plus": { "label": "+" },
+    "plus-minus": { "label": "+/-" }
+  },
+  "lines": {
+    "wall:blocks": { "to": "wall" },
+    "wall:clay": { "to": "wall" },
+    "wall:debris": { "to": "wall" },
+    "wall:ice": { "to": "wall" },
+    "floor-step": { "to": "pit" },
+    "abyss-entrance": { "to": "pit" }
+  },
+  "areas": {
+    "clay-area": { "to": "clay" }
+  },
+  "generic": {
+    "strip_line_subtypes": true,
+    "strip_area_suffix": true
+  }
+}

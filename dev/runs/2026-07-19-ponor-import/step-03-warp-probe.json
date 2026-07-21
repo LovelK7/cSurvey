@@ -1,0 +1,109 @@
+{
+  "calculate": {
+    "has_speleometrics": true,
+    "present": true,
+    "stations": 57
+  },
+  "centerline": {
+    "branches": 1,
+    "caves": 1,
+    "distox_attr_segments": 0,
+    "lrud_nonzero": 0,
+    "origin": "1",
+    "segments": 56,
+    "sessions": 1,
+    "shots": 7,
+    "splays": 49,
+    "trigpoints": 57
+  },
+  "container": {
+    "assets": {},
+    "entries": null,
+    "file_bytes": 267539,
+    "format": "csx",
+    "xml_bytes": 267539
+  },
+  "crosssections": 0,
+  "file": "step-03-warp-probe.csx",
+  "path": "dev\\runs\\2026-07-19-ponor-import\\step-03-warp-probe.csx",
+  "provenance": {
+    "creat_postprocessed": true,
+    "creatdate": "2026-07-19T00:00:00.0000000",
+    "creatid": "TopoDroid",
+    "creatversion": "6.4.29",
+    "custom_fields": {
+      "designitems": [
+        "import_source",
+        "import_date"
+      ],
+      "segments": [
+        "distox_g",
+        "distox_m",
+        "distox_dip",
+        "distox",
+        "import_source",
+        "import_date"
+      ]
+    },
+    "file_version": "1.14",
+    "import_stamps": {
+      "import_date": {
+        "2026-07-19T00:00:00.0000000": 56
+      },
+      "import_source": {
+        "TopoDroid": 56
+      }
+    },
+    "survey_name": null,
+    "verdict": "post-import (TopoDroid origin, already processed by cSurvey)"
+  },
+  "sketch": {
+    "plan": {
+      "bbox": [
+        -11.71,
+        -14.94,
+        0.23,
+        1.69
+      ],
+      "coord_sum": -2516.51,
+      "flat_by_type": {},
+      "flat_items": 0,
+      "flat_names": {},
+      "has_layers_element": true,
+      "items_without_bound_points": 0,
+      "nested_by_layer": {
+        "2 WaterAndFloorMorphologies": 7,
+        "5 Borders": 1,
+        "6 Signs": 1
+      },
+      "nested_items": 9,
+      "points_bound": 305,
+      "points_parse_warnings": 0,
+      "points_total": 305
+    },
+    "profile": {
+      "bbox": [
+        -22.27,
+        -0.27,
+        0.58,
+        40.54
+      ],
+      "coord_sum": 5200.04,
+      "flat_by_type": {},
+      "flat_items": 0,
+      "flat_names": {},
+      "has_layers_element": true,
+      "items_without_bound_points": 0,
+      "nested_by_layer": {
+        "5 Borders": 1,
+        "6 Signs": 16
+      },
+      "nested_items": 17,
+      "points_bound": 361,
+      "points_parse_warnings": 0,
+      "points_total": 361
+    },
+    "total_items": 26
+  },
+  "warnings": []
+}

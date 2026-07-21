@@ -1,0 +1,104 @@
+{
+  "calculate": {
+    "has_speleometrics": true,
+    "present": true,
+    "stations": 5
+  },
+  "centerline": {
+    "branches": 1,
+    "caves": 1,
+    "distox_attr_segments": 0,
+    "lrud_nonzero": 0,
+    "origin": "0",
+    "segments": 4,
+    "sessions": 1,
+    "shots": 4,
+    "splays": 0,
+    "trigpoints": 5
+  },
+  "container": {
+    "assets": {},
+    "entries": null,
+    "file_bytes": 182107,
+    "format": "csx",
+    "xml_bytes": 182107
+  },
+  "crosssections": 0,
+  "file": "step-01-after-import.csx",
+  "path": "dev\\runs\\2026-07-19-symbol-zoo\\step-01-after-import.csx",
+  "provenance": {
+    "creat_postprocessed": true,
+    "creatdate": "2026-07-19T00:00:00.0000000",
+    "creatid": "TopoDroid",
+    "creatversion": "6.4.29",
+    "custom_fields": {
+      "designitems": [
+        "import_source",
+        "import_date"
+      ],
+      "segments": [
+        "distox_g",
+        "distox_m",
+        "distox_dip",
+        "distox",
+        "import_source",
+        "import_date"
+      ]
+    },
+    "file_version": "1.14",
+    "import_stamps": {
+      "import_date": {
+        "2026-07-19T00:00:00.0000000": 4
+      },
+      "import_source": {
+        "TopoDroid": 4
+      }
+    },
+    "survey_name": "SYMBOL_ZOO",
+    "verdict": "post-import (TopoDroid origin, already processed by cSurvey)"
+  },
+  "sketch": {
+    "plan": {
+      "bbox": [
+        0.0,
+        -5.0,
+        86.0,
+        5.0
+      ],
+      "coord_sum": 5125.5,
+      "flat_by_type": {},
+      "flat_items": 0,
+      "flat_names": {},
+      "has_layers_element": true,
+      "items_without_bound_points": 0,
+      "nested_by_layer": {
+        "1 Soil": 8,
+        "2 WaterAndFloorMorphologies": 7,
+        "3 RocksAndConcretion": 1,
+        "4 CeilingMorphologies": 2,
+        "5 Borders": 12,
+        "6 Signs": 44
+      },
+      "nested_items": 74,
+      "points_bound": 145,
+      "points_parse_warnings": 0,
+      "points_total": 145
+    },
+    "profile": {
+      "bbox": null,
+      "coord_sum": null,
+      "flat_by_type": {},
+      "flat_items": 0,
+      "flat_names": {},
+      "has_layers_element": true,
+      "items_without_bound_points": 0,
+      "nested_by_layer": {},
+      "nested_items": 0,
+      "points_bound": 0,
+      "points_parse_warnings": 0,
+      "points_total": 0
+    },
+    "total_items": 74
+  },
+  "warnings": []
+}
