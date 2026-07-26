@@ -70,6 +70,12 @@ POINT_LEAVE = set()
 LINE_LEAVE = set()
 AREA_LEAVE = set()
 
+# per-entry extras from the mapping file: {(section, tdx-name): {...}}
+#   "reverse": True     (lines) flip stroke direction -> decorations face the
+#                       other side (e.g. chimney->overhang pointing outward)
+#   "orientation": deg  (points) set the item's orientation attribute
+EXTRAS = {}
+
 LINE_RENAMES = {
     "wall:blocks": "wall",
     "wall:clay": "wall",
@@ -108,7 +114,45 @@ def load_mapping(path):
                 labels[name] = action["label"]
             elif action.get("leave"):
                 leaves.add(name)
+            extras = {k: action[k] for k in ("reverse", "orientation")
+                      if k in action}
+            if extras:
+                EXTRAS[(section, name)] = extras
     GENERIC = {**GENERIC, **cfg.get("generic", {})}
+
+
+def reverse_line_points(item, warnings):
+    """Reverse the stroke direction of a raw TDX line item (its `points@data`
+    is `x y [B] x y ...` — B marks the stroke start). Decorated pens stamp
+    their marks on a side determined by direction, so this flips them."""
+    pts_el = item.find("points")
+    data = pts_el.get("data") if pts_el is not None else None
+    if not data:
+        return False
+    toks = data.split()
+    pts, i = [], 0
+    while i < len(toks):
+        t = toks[i]
+        if t[0] in "-0123456789.":
+            if i + 1 < len(toks) and toks[i + 1][0] in "-0123456789.":
+                pts.append((t, toks[i + 1]))
+                i += 2
+            else:
+                warnings.append("reverse skipped (odd coordinate) on %r"
+                                % item.get("name"))
+                return False
+        elif t == "B":
+            i += 1
+        else:
+            warnings.append("reverse skipped (unexpected token %r) on %r"
+                            % (t, item.get("name")))
+            return False
+    if len(pts) < 2:
+        return False
+    pts.reverse()
+    out = ["%s %s" % pts[0], "B"] + ["%s %s" % p for p in pts[1:]]
+    pts_el.set("data", " ".join(out) + " ")
+    return True
 
 # line names cSurvey's ConvertItem maps specially; a `base:subtype` name whose
 # base is here falls through to a generic border UNLESS it is an explicit case
@@ -201,6 +245,17 @@ def process_item(item, stats, warnings):
             item.set("name", name[:-5])
             mark(item, name)
             stats["renamed"].append("%s -> %s" % (name, name[:-5]))
+
+    extras = EXTRAS.get(({"point": "points", "line": "lines",
+                          "area": "areas"}.get(kind, ""), name))
+    if extras:
+        if extras.get("reverse") and kind == "line":
+            if reverse_line_points(item, warnings):
+                stats["renamed"].append("%s: stroke direction reversed" % name)
+        if "orientation" in extras and kind == "point":
+            item.set("orientation", "%.2f" % float(extras["orientation"]))
+            stats["renamed"].append("%s: orientation set to %s"
+                                    % (name, extras["orientation"]))
 
     leave = {"point": POINT_LEAVE, "line": LINE_LEAVE,
              "area": AREA_LEAVE}.get(kind, set())

@@ -1,0 +1,128 @@
+{
+  "calculate": {
+    "has_speleometrics": false,
+    "present": false,
+    "stations": 0
+  },
+  "centerline": {
+    "branches": 1,
+    "caves": 1,
+    "distox_attr_segments": 38,
+    "lrud_nonzero": 0,
+    "origin": "0",
+    "segments": 38,
+    "sessions": 1,
+    "shots": 4,
+    "splays": 34,
+    "trigpoints": 0
+  },
+  "container": {
+    "assets": {},
+    "entries": null,
+    "file_bytes": 34796,
+    "format": "csx",
+    "xml_bytes": 34796
+  },
+  "crosssections": 0,
+  "file": "step-00b-raw-export.csx",
+  "path": "dev\\runs\\2026-07-19-rupe-acceptance\\step-00b-raw-export.csx",
+  "provenance": {
+    "creat_postprocessed": false,
+    "creatdate": "2026-07-23",
+    "creatid": "TopoDroid",
+    "creatversion": "6.4.29",
+    "custom_fields": {},
+    "file_version": "1.11",
+    "import_stamps": {},
+    "survey_name": null,
+    "verdict": "raw TopoDroid export (pre-import: fix-up chain will run on load)"
+  },
+  "sketch": {
+    "plan": {
+      "bbox": [
+        -5.66,
+        -2.25,
+        2.72,
+        12.05
+      ],
+      "coord_sum": 2733.28,
+      "flat_by_type": {
+        "area": 7,
+        "line": 17,
+        "point": 1
+      },
+      "flat_items": 25,
+      "flat_names": {
+        "abyss-entrance": 1,
+        "blocks": 1,
+        "chimney": 1,
+        "clay": 1,
+        "clay-area": 1,
+        "debris": 1,
+        "floor-step": 2,
+        "label": 1,
+        "overhang": 1,
+        "pebbles": 1,
+        "pit": 3,
+        "sand": 1,
+        "slope": 4,
+        "slope:shallow": 1,
+        "user": 2,
+        "wall": 1,
+        "water": 1,
+        "water-flow": 1
+      },
+      "has_layers_element": false,
+      "items_without_bound_points": 25,
+      "nested_by_layer": {},
+      "nested_items": 0,
+      "points_bound": 0,
+      "points_parse_warnings": 0,
+      "points_total": 749
+    },
+    "profile": {
+      "bbox": [
+        -8.13,
+        -3.66,
+        2.4,
+        9.5
+      ],
+      "coord_sum": 69.96,
+      "flat_by_type": {
+        "area": 3,
+        "line": 6,
+        "point": 33
+      },
+      "flat_items": 42,
+      "flat_names": {
+        "air-draught": 1,
+        "anchor": 2,
+        "blocks": 5,
+        "border": 1,
+        "breakdown-choke": 1,
+        "clay-area": 3,
+        "continuation": 1,
+        "danger": 1,
+        "debris": 5,
+        "dig": 1,
+        "entrance": 1,
+        "label": 1,
+        "stalactite": 4,
+        "stalagmite": 2,
+        "tree-trunk": 1,
+        "user": 6,
+        "wall": 2,
+        "water-drip": 4
+      },
+      "has_layers_element": false,
+      "items_without_bound_points": 42,
+      "nested_by_layer": {},
+      "nested_items": 0,
+      "points_bound": 0,
+      "points_parse_warnings": 0,
+      "points_total": 324
+    },
+    "total_items": 67
+  },
+  "warnings": []
+}

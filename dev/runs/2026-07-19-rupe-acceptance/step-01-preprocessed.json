@@ -19,9 +19,9 @@
   "container": {
     "assets": {},
     "entries": null,
-    "file_bytes": 30479,
+    "file_bytes": 30602,
     "format": "csx",
-    "xml_bytes": 30479
+    "xml_bytes": 30602
   },
   "crosssections": 0,
   "file": "step-01-preprocessed.csx",
@@ -53,15 +53,15 @@
       },
       "flat_items": 20,
       "flat_names": {
-        "chimney": 1,
         "clay": 2,
         "label": 1,
-        "pit": 6,
+        "overhang": 2,
+        "pit": 5,
+        "presumed": 1,
         "slope": 5,
         "user": 2,
         "wall": 1,
-        "water": 1,
-        "water-flow": 1
+        "water": 1
       },
       "has_layers_element": false,
       "items_without_bound_points": 20,
@@ -87,18 +87,18 @@
       "flat_items": 35,
       "flat_names": {
         "air-draught": 1,
-        "anchor": 2,
-        "blocks": 10,
+        "blocks": 5,
         "breakdown-choke": 1,
+        "breakdownchoke": 5,
         "clay": 3,
         "continuation": 1,
         "dig": 1,
         "entrance": 1,
-        "label": 2,
+        "label": 4,
         "user": 6,
-        "vegetable-debris": 1,
+        "vegetabledebris": 1,
         "wall": 2,
-        "waterfall": 4
+        "waterflow": 4
       },
       "has_layers_element": false,
       "items_without_bound_points": 35,

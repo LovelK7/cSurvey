@@ -55,29 +55,44 @@ SIGN_NAMES = {0:"Undefined",257:"Continuation",258:"NarrowEnd",259:"LowEnd",
 
 STRIPPED_TO_SIGN = {n.lower(): v for v, n in SIGN_NAMES.items()}
 
+# (import name, description, designtools.xml tool name for icon + app captions)
 LINE_TARGETS = [  # number 101.. in this order
-    ("wall", "cave border — inverted filled area (Borders)"),
-    ("wall:presumed", "presumed cave border (Borders)"),
-    ("presumed", "presumed border line (Borders)"),
-    ("border", "plain border line (Borders)"),
-    ("overhang", "overhang curve (Water/floor)"),
-    ("pit", "cliff/drop curve (Water/floor)"),
-    ("chimney", "ceiling cliff curve (Ceiling)"),
-    ("slope", "level/slope curve (Water/floor)"),
-    ("floor-meander", "meander (Water/floor)"),
-    ("ceiling-meander", "meander (Ceiling)"),
-    ("rock-border", "rock area (Rocks)"),
-    ("water-flow", "watercourse line (Water/floor)"),
-    ("section", "x-section placeholder (Water/floor)"),
+    ("wall", "cave border — inverted filled area (Borders)",
+     "btnDesignTools_Borders_CaveBorder"),
+    ("wall:presumed", "presumed cave border (Borders)",
+     "btnDesignTools_Borders_PresumedCaveBorder"),
+    ("presumed", "presumed border line (Borders)",
+     "btnDesignTools_Borders_PresumedBorder"),
+    ("border", "plain border line (Borders)",
+     "btnDesignTools_Borders_Border"),
+    ("overhang", "overhang curve (Water/floor)",
+     "btnDesignTools_Water_OverhangCurve"),
+    ("pit", "cliff/drop curve — the black-triangles line (Water/floor)",
+     "btnDesignTools_Water_CliffCurve"),
+    ("chimney", "ceiling cliff curve (Ceiling)",
+     "btnDesignTools_TerrainLevel_PresumedCliffCurve"),
+    ("slope", "level/slope curve (Water/floor)",
+     "btnDesignTools_Water_LevelCurve"),
+    ("floor-meander", "meander (Water/floor)",
+     "btnDesignTools_Water_Meander"),
+    ("ceiling-meander", "meander (Ceiling)",
+     "btnDesignTools_TerrainLevel_PresumedMeander"),
+    ("rock-border", "rock area (Rocks)",
+     "Rocks_RockBorderWithFilling"),
+    ("water-flow", "watercourse: floor curve with blue pen (Water/floor)",
+     "btnDesignTools_Water_Border"),
+    ("section", "x-section placeholder (Water/floor)",
+     "btnDesignTools_Water_PresumedBorder"),
 ]
 
 AREA_TARGETS = [  # number 201..
-    ("water", "water area (Water/floor)"),
-    ("sand", "sand soil"),
-    ("clay", "soil, sand brush (no clay brush exists)"),
-    ("debris", "small-debris soil"),
-    ("blocks", "big-debris soil"),
-    ("pebbles", "pebbles soil"),
+    ("water", "water area (Water/floor)", "btnDesignTools_Water_Water"),
+    ("sand", "sand soil", "btnDesignTools_Soil_Sand"),
+    ("clay", "soil, sand brush (no clay brush exists)",
+     "btnDesignTools_Soil_Sand"),
+    ("debris", "small-debris soil", "btnDesignTools_Soil_SmallDebrits"),
+    ("blocks", "big-debris soil", "btnDesignTools_Soil_BigDebrits"),
+    ("pebbles", "pebbles soil", "btnDesignTools_Soil_Pebbles"),
 ]
 
 # stylized previews — the real cSurvey rendering differs in detail
@@ -109,6 +124,32 @@ AREA_PREVIEWS = {
 SET_ORDER = ["symbols_speleo", "symbols_extra", "symbols_karst",
              "symbols_geo", "symbols_mine", "symbols_archeo",
              "symbols_anthro", "symbols_paleo", "symbols_bio"]
+
+
+def parse_designtools(path):
+    """-> {tool name: {"it":..., "en":..., "svg":..., "type":...}} for all
+    drawing tools in the app's designtools.xml."""
+    import xml.etree.ElementTree as ET
+    tools = {}
+
+    def caption(tool, lang):
+        for c in tool.findall("caption"):
+            if c.get("lang") == lang:
+                return c.get("caption") or ""
+        return tool.get("caption", "")
+
+    def walk(el):
+        for t in el.findall("tool"):
+            name = t.get("name")
+            if name:
+                tools[name] = {"it": caption(t, "it"), "en": caption(t, "en"),
+                               "svg": t.get("svgimage", ""),
+                               "type": t.get("type", "")}
+            walk(t)
+
+    root = ET.parse(path).getroot()
+    walk(root.find("tools"))
+    return tools
 
 sys.path.insert(0, HERE)
 import preprocess_tdx_csx as PP  # noqa: E402
@@ -221,6 +262,16 @@ def tdx_svg(elements, kind):
 # ---------------------------------------------------------------------------
 # outcome / current target resolution
 
+def extras_suffix(section, name):
+    ex = getattr(PP, "EXTRAS", {}).get((section, name.lower()), {})
+    out = ""
+    if ex.get("reverse"):
+        out += " r"
+    if "orientation" in ex:
+        out += " o%g" % ex["orientation"]
+    return out
+
+
 def resolve_point(name, sign_to_num, glyphs):
     """-> (verdict, css, target_number_or_None, explicit_input_prefill)."""
     n = name.lower()
@@ -240,7 +291,9 @@ def resolve_point(name, sign_to_num, glyphs):
         verdict = SIGN_NAMES[v] + (" — renders" if v in glyphs
                                    else " — NO GLYPH, X-box")
         css = "ok" if v in glyphs else "warn"
-        return (verdict, css, num, str(num) if explicit and num else "")
+        prefill = (str(num) + extras_suffix("points", n)
+                   if explicit and num else "")
+        return (verdict, css, num, prefill)
     return ("UNMAPPED — X-box", "bad", None, "")
 
 
@@ -255,7 +308,8 @@ def resolve_line(name, name_to_num):
             n2 = base
     if n2 in name_to_num:
         num = name_to_num[n2]
-        return (n2, "ok", num, str(num) if explicit else "")
+        prefill = (str(num) + extras_suffix("lines", n)) if explicit else ""
+        return (n2, "ok", num, prefill)
     return ("plain border (fallback)", "warn", name_to_num["border"], "")
 
 
@@ -278,14 +332,16 @@ STYLE = """
  .row{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid #ddd;
       border-radius:8px;padding:6px 12px;margin-bottom:6px;max-width:980px}
  .num{font-weight:700;font-size:15px;width:52px;flex:none;color:#333}
- .glyph{width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center}
- .glyph svg{max-width:48px;max-height:48px;overflow:visible}
+ .glyph{width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
+ .glyph svg{max-width:48px;max-height:48px;overflow:hidden}
  .glyph svg *{vector-effect:non-scaling-stroke}
  .meta{font-size:12.5px;line-height:1.4;flex:1}
  .it{color:#046} .out{font-weight:600} .ok{color:#071} .warn{color:#b60} .bad{color:#b00}
- .tgt{width:64px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;
-      border-left:1px dashed #ccc;padding-left:10px}
- .tgt svg{max-width:60px;max-height:34px}
+ .tgt{width:112px;height:68px;flex:none;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;border-left:1px dashed #ccc;padding-left:10px;overflow:hidden;
+      font-size:10px;text-align:center;gap:2px}
+ .tgt svg{max-width:64px;max-height:48px;overflow:hidden}
+ .tgt div{font-size:10px;line-height:1.1;color:#555}
  input.map{width:80px;flex:none;font-size:14px;padding:3px 6px}
  .note{background:#ffe;border:1px solid #dda;padding:8px 12px;border-radius:6px;max-width:960px;font-size:13px}
  button{font-size:14px;padding:6px 14px;margin:8px 0}
@@ -309,6 +365,8 @@ def main(argv=None):
     ap.add_argument("--signs-dir", default=r"C:\csurvey64\Objects\Cliparts\Signs")
     ap.add_argument("--tdx-dir", default=os.path.join(
         REPO, "dev", "literature", "topodroid", "symbols-git"))
+    ap.add_argument("--designtools", default=r"C:\csurvey64\designtools.xml")
+    ap.add_argument("--icons-dir", default=r"C:\csurvey64\Objects\Icons")
     ap.add_argument("--map", dest="map_file", default=PP.DEFAULT_MAP)
     args = ap.parse_args(argv)
 
@@ -317,8 +375,30 @@ def main(argv=None):
     cs_points = load_cs_points(args.signs_dir)
     glyphs = {sign for _, sign, _, _, _ in cs_points}
     sign_to_num = {sign: n for n, sign, _, _, _ in cs_points}
-    line_to_num = {name: 101 + i for i, (name, _) in enumerate(LINE_TARGETS)}
-    area_to_num = {name: 201 + i for i, (name, _) in enumerate(AREA_TARGETS)}
+    line_to_num = {name: 101 + i for i, (name, _, _) in enumerate(LINE_TARGETS)}
+    area_to_num = {name: 201 + i for i, (name, _, _) in enumerate(AREA_TARGETS)}
+
+    tools = (parse_designtools(args.designtools)
+             if os.path.exists(args.designtools) else {})
+    icon_counter = [1000]
+
+    def tool_info(toolname, fallback_preview):
+        """-> (svg_html, 'it-name / en-name') for a designtools tool."""
+        t = tools.get(toolname, {})
+        label = " / ".join(x for x in (t.get("it"), t.get("en")) if x)
+        svg = None
+        fn = t.get("svg")
+        if fn:
+            p = os.path.join(args.icons_dir, fn)
+            if os.path.exists(p):
+                icon_counter[0] += 1
+                svg = isolate_svg(open(p, encoding="utf-8",
+                                       errors="replace").read(),
+                                  icon_counter[0])
+        if svg is None:
+            svg = ('<svg class="noscale" width="60" height="30" '
+                   'viewBox="0 0 48 26">%s</svg>' % fallback_preview)
+        return svg, label
 
     # ---- cs-targets.html -------------------------------------------------
     rows = []
@@ -329,21 +409,34 @@ def main(argv=None):
                     '</div></div>' % (n, svg, html.escape(ename),
                                       html.escape(app), sign))
     lrows = []
-    for i, (name, desc) in enumerate(LINE_TARGETS):
+    for i, (name, desc, toolname) in enumerate(LINE_TARGETS):
+        svg, label = tool_info(toolname, LINE_PREVIEWS[name])
         lrows.append('<div class="row"><div class="num">%d</div>'
-                     '<div class="glyph"><svg class="noscale" width="60" height="30" '
-                     'viewBox="0 0 48 26">%s</svg></div><div class="meta"><b>%s</b> '
-                     '— %s</div></div>'
-                     % (101 + i, LINE_PREVIEWS[name], html.escape(name),
+                     '<div class="glyph">%s</div><div class="meta"><b>%s</b> '
+                     '<span class="it">toolbar: %s</span><br>%s</div></div>'
+                     % (101 + i, svg, html.escape(name), html.escape(label),
                         html.escape(desc)))
     arows = []
-    for i, (name, desc) in enumerate(AREA_TARGETS):
+    for i, (name, desc, toolname) in enumerate(AREA_TARGETS):
+        svg, label = tool_info(toolname, AREA_PREVIEWS[name])
         arows.append('<div class="row"><div class="num">%d</div>'
-                     '<div class="glyph"><svg class="noscale" width="60" height="30" '
-                     'viewBox="0 0 48 26">%s</svg></div><div class="meta"><b>%s</b> '
-                     '— %s</div></div>'
-                     % (201 + i, AREA_PREVIEWS[name], html.escape(name),
+                     '<div class="glyph">%s</div><div class="meta"><b>%s</b> '
+                     '<span class="it">toolbar: %s</span><br>%s</div></div>'
+                     % (201 + i, svg, html.escape(name), html.escape(label),
                         html.escape(desc)))
+
+    # designer-only drawing tools — NOT reachable via TopoDroid import
+    used_tools = {t for _, _, t in LINE_TARGETS} | {t for _, _, t in AREA_TARGETS}
+    drows = []
+    for toolname, t in tools.items():
+        if (t.get("type") in ("freehandline", "freehandarea",
+                              "invertedfreehandarea")
+                and toolname not in used_tools):
+            svg, label = tool_info(toolname, "")
+            drows.append('<div class="row"><div class="glyph">%s</div>'
+                         '<div class="meta"><b>%s</b> <span>(%s)</span></div>'
+                         '</div>' % (svg, html.escape(label or toolname),
+                                     html.escape(t.get("type", ""))))
 
     cs_page = """<!doctype html><html><head><meta charset="utf-8">
 <title>cSurvey targets (numbered)</title><style>%s</style></head><body>
@@ -353,8 +446,13 @@ gallery SVGs from the installed build; line/area previews are stylized approxima
 <h2>Points (type the number in a point row)</h2>%s
 <h2>Lines (101–113, for line rows)</h2>%s
 <h2>Areas (201–206, for area rows)</h2>%s
+<h2>Designer-only tools — NOT reachable via TopoDroid import</h2>
+<p class="note">These exist only in cSurvey's drawing toolbars (icons + names shown as in
+the app). The import converter cannot produce them; to use one, draw/re-type in cSurvey
+after import (a post-import re-typing tool is on the backlog).</p>%s
 <script>%s</script></body></html>""" % (
-        STYLE, "\n".join(rows), "\n".join(lrows), "\n".join(arows), AUTOFIT_JS)
+        STYLE, "\n".join(rows), "\n".join(lrows), "\n".join(arows),
+        "\n".join(drows), AUTOFIT_JS)
 
     cs_out = os.path.join(HERE, "cs-targets.html")
     with open(cs_out, "w", encoding="utf-8", newline="\n") as f:
@@ -367,15 +465,15 @@ gallery SVGs from the installed build; line/area previews are stylized approxima
         templates.append('<template id="cs-%d">%s<div>%s</div></template>'
                          % (n, svg, html.escape(ename)))
         js_names[n] = SIGN_NAMES[sign].lower()
-    for i, (name, _) in enumerate(LINE_TARGETS):
-        templates.append('<template id="cs-%d"><svg width="60" height="30" '
-                         'viewBox="0 0 48 26">%s</svg><div>%s</div></template>'
-                         % (101 + i, LINE_PREVIEWS[name], html.escape(name)))
+    for i, (name, _, toolname) in enumerate(LINE_TARGETS):
+        svg, _label = tool_info(toolname, LINE_PREVIEWS[name])
+        templates.append('<template id="cs-%d">%s<div>%s</div></template>'
+                         % (101 + i, svg, html.escape(name)))
         js_names[101 + i] = name
-    for i, (name, _) in enumerate(AREA_TARGETS):
-        templates.append('<template id="cs-%d"><svg width="60" height="30" '
-                         'viewBox="0 0 48 26">%s</svg><div>%s</div></template>'
-                         % (201 + i, AREA_PREVIEWS[name], html.escape(name)))
+    for i, (name, _, toolname) in enumerate(AREA_TARGETS):
+        svg, _label = tool_info(toolname, AREA_PREVIEWS[name])
+        templates.append('<template id="cs-%d">%s<div>%s</div></template>'
+                         % (201 + i, svg, html.escape(name)))
         js_names[201 + i] = name
 
     sections = []
@@ -421,6 +519,43 @@ gallery SVGs from the installed build; line/area previews are stylized approxima
                             % (html.escape(symset.replace("symbols_", "")),
                                len(srows), "\n".join(srows)))
 
+    # TopoDroid's 8 built-in "system" tools have no files in symbols-git —
+    # synthesize their rows so they are visible and mappable too
+    sys_rows = []
+    SYSTEM = [("point", "user"), ("point", "label"),
+              ("line", "user"), ("line", "wall"), ("line", "section"),
+              ("area", "user"), ("area", "water")]
+    for kind, name in SYSTEM:
+        if kind == "point":
+            verdict, css, tno, prefill = resolve_point(name, sign_to_num, glyphs)
+        elif kind == "line":
+            verdict, css, tno, prefill = resolve_line(name, line_to_num)
+        else:
+            verdict, css, tno, prefill = resolve_area(name, area_to_num)
+        tnum += 1
+        icon = ('<svg class="noscale" width="48" height="32" viewBox="0 0 48 32">'
+                '<rect x="1" y="1" width="46" height="30" rx="5" '
+                'style="fill:#f4f4f4;stroke:#999;stroke-width:1"/>'
+                '<text x="24" y="20" text-anchor="middle" '
+                'style="font-size:9px;fill:#333">%s</text></svg>' % html.escape(name))
+        note = ("non-standard water brush = postimport option in "
+                "tdx-mapping.json" if (kind, name) == ("area", "water") else
+                "TopoDroid system tool (no symbol file)")
+        sys_rows.append("""
+<div class="row" data-kind="%s" data-name="%s">
+ <div class="num">T%d</div>
+ <div class="glyph">%s</div>
+ <div class="meta"><b>%s</b> <span>(%s)</span><br><span class="it">%s</span>
+  <span class="out %s">%s</span></div>
+ <div class="arrow">→</div>
+ <div class="tgt" data-init="%s"></div>
+ <input class="map" placeholder="" value="%s" title="number [r] [oNN], label:TEXT, or leave">
+</div>""" % (kind, html.escape(name), tnum, icon, html.escape(name), kind,
+             html.escape(note), css, html.escape(verdict), tno or "",
+             html.escape(prefill)))
+    sections.append("<h2>system tools (%d)</h2>%s"
+                    % (len(sys_rows), "\n".join(sys_rows)))
+
     wb_js = """
 var CS_NAMES = %s;
 function setPreview(row, val){
@@ -459,12 +594,24 @@ function exportMap(){
       if(kind !== 'point'){ bad.push(name + ': label only for points'); return; }
       cfg[section][name] = {label: v.substring(6)}; return;
     }
-    var n = parseInt(v, 10);
+    var parts = v.split(/\\s+/);
+    var n = parseInt(parts[0], 10);
     if(isNaN(n) || !CS_NAMES[n]){ bad.push(name + ': unknown target ' + v); return; }
     var okRange = kind === 'point' ? (n < 100) : kind === 'line' ? (n >= 101 && n <= 199)
                 : (n >= 201);
     if(!okRange){ bad.push(name + ': ' + v + ' is not a ' + kind + ' target'); return; }
-    cfg[section][name] = {to: CS_NAMES[n]};
+    var entry = {to: CS_NAMES[n]};
+    for(var i = 1; i < parts.length; i++){
+      var f = parts[i];
+      if(f === 'r'){
+        if(kind !== 'line'){ bad.push(name + ': r (reverse) is lines-only'); return; }
+        entry.reverse = true;
+      } else if(/^o-?\\d+$/.test(f)){
+        if(kind !== 'point'){ bad.push(name + ': oNN (orientation) is points-only'); return; }
+        entry.orientation = parseInt(f.substring(1), 10);
+      } else { bad.push(name + ': unknown flag ' + f); return; }
+    }
+    cfg[section][name] = entry;
   });
   if(bad.length){ alert('Fix these first:\\n' + bad.join('\\n')); return; }
   var blob = new Blob([JSON.stringify(cfg, null, 2)], {type:'application/json'});
@@ -479,10 +626,15 @@ function exportMap(){
 <p class="note"><b>How to use:</b> open <code>cs-targets.html</code> in a second window
 for the numbered menu. In each row's box type a <b>target number</b> (points take 1–99,
 lines 101–113, areas 201–206), or <code>label:TEXT</code> (points only), or
-<code>leave</code>. Empty = default behavior. The → preview updates live.
+<code>leave</code>. Empty = default behavior. Optional flags after the number:
+<code>r</code> (lines only — reverse the stroke so pen decorations face the other side)
+and <code>oNN</code> (points only — force orientation to NN degrees), e.g.
+<code>105 r</code> or <code>12 o90</code>. The → preview updates live.
 Then press the button — it downloads <code>tdx-mapping.json</code>; replace
 <code>dev/tools/tdx-mapping.json</code> with it and re-run
-<code>preprocess_tdx_csx.py</code>. Prefilled boxes show the current explicit mapping.</p>
+<code>preprocess_tdx_csx.py</code>. Prefilled boxes show the current explicit mapping.
+Post-import switches (spline linetypes, non-standard water brush) live in the file's
+<code>postimport</code> section and are applied by <code>fix_imported_linetypes.py</code>.</p>
 <button onclick="exportMap()">⬇ Export tdx-mapping.json</button>
 %s
 %s

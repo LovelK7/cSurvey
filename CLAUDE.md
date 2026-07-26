@@ -52,6 +52,7 @@ cSurvey is Windows desktop cave-survey software (VB.NET WinForms, .NET Framework
 
 ## TopoDroid: what matters
 
+- **The working TDX→cSurvey processing protocol is [dev/docs/tdx-processing-protocol.md](dev/docs/tdx-processing-protocol.md)** (pre-processor + user-owned mapping config + post-import fixer + visual mapping workbench, all in `dev/tools/`; operational since 2026-07-26). Symbol ground truth: [dev/docs/tdx-symbol-matrix.md](dev/docs/tdx-symbol-matrix.md).
 - cSurvey **cannot read TopoDroid's .zip project archive.** The interchange formats are TopoDroid's exports: **`.csx`** (cSurvey's own XML — richest, contains data + phone-drawn sketches; the recommended path), therion `.th` (centerline), and `.th2` (sketches).
 - TopoDroid `.csx` files are auto-detected on load (`properties/@creatid="topodroid"` without `creat_postprocessed`) and run through a three-stage fix-up: `modImport.FixTopodroidCSX` (raw DOM: GUID segment ids, uppercase stations), `cImportTopoDroidHelper.ConvertDesign/ConvertItem` (therion-named sketch items → typed layer items, x-sections, signs), `FixTopodroidSurvey` (stamps `import_source`/`import_date`, force-binds every item to the centerline).
 - Headless-friendly entry point: `cSurvey.Load(path, LoadOptionsEnum.FixTopoDroid)` forces the whole chain — this is exactly what the UI import does at [frmMain2.vb:11861](cSurveyPC/frmMain2.vb#L11861), with no form involvement.
