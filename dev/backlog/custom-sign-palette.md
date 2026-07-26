@@ -1,7 +1,7 @@
 # Backlog: custom TDX↔cSurvey symbol palette from SVG icons
 
 **Status: idea, parked** (user request 2026-07-19, during the symbol-zoo campaign).
-Grounding: [dev/docs/tdx-symbol-matrix.md](../docs/tdx-symbol-matrix.md) ("Rendering layer" section).
+Grounding: [dev/production/tdx-symbol-matrix.md](../production/tdx-symbol-matrix.md) ("Rendering layer" section).
 
 ## The insight
 
@@ -34,7 +34,7 @@ survives the phone→PC trip with zero code changes on either side.
    DevExpress build.
 3. **TDX custom set:** restrict/extend the phone palette to the club's agreed
    vocabulary (matrix ✅✅ set + pack from 1/2); pre-processor
-   (`dev/tools/preprocess_tdx_csx.py`) remains the safety net for old surveys.
+   (`dev/production/tools/preprocess_tdx_csx.py`) remains the safety net for old surveys.
 
 ## Open questions
 
