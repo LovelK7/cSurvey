@@ -1,0 +1,22 @@
+[
+  {
+    "name": "v6.2.12",
+    "zipball_url": "https://api.github.com/repos/marcocorvi/topodroid/zipball/refs/tags/v6.2.12",
+    "tarball_url": "https://api.github.com/repos/marcocorvi/topodroid/tarball/refs/tags/v6.2.12",
+    "commit": {
+      "sha": "4a8d45df08eacec58ec07add9932837170fa40e7",
+      "url": "https://api.github.com/repos/marcocorvi/topodroid/commits/4a8d45df08eacec58ec07add9932837170fa40e7"
+    },
+    "node_id": "MDM6UmVmMzIxNDE5MDI6cmVmcy90YWdzL3Y2LjIuMTI="
+  },
+  {
+    "name": "v6.2.11",
+    "zipball_url": "https://api.github.com/repos/marcocorvi/topodroid/zipball/refs/tags/v6.2.11",
+    "tarball_url": "https://api.github.com/repos/marcocorvi/topodroid/tarball/refs/tags/v6.2.11",
+    "commit": {
+      "sha": "62e9420811d0d7ce594c293f86d78272c705dfb9",
+      "url": "https://api.github.com/repos/marcocorvi/topodroid/commits/62e9420811d0d7ce594c293f86d78272c705dfb9"
+    },
+    "node_id": "MDM6UmVmMzIxNDE5MDI6cmVmcy90YWdzL3Y2LjIuMTE="
+  }
+]

@@ -1,4 +1,34 @@
-# dev/tools — Stage 0 survey inspector
+# dev/tools — Stage 0 survey inspector (+ TDX recovery tools)
+
+## TopoDroid zip → csx recovery (`tdx_zip_to_csx.py`, `parse_tdr.py`, `recover_tdx.bat`)
+
+Regenerates a raw-TopoDroid `.csx` (centerline **and** sketch) from a TopoDroid **project zip**
+(`manifest` + `survey.sql` + `.tdr`), replaying TopoDroid's own csx exporter offline. Built in
+[projects/0003-tdx-zip-recovery](../../projects/0003-tdx-zip-recovery/brief.md) after TopoDroid
+6.4.99 shipped a 0-byte-csx crash and a tdr format bump that older app versions silently refuse
+(sketches vanish on cross-version zip import — the data is fine, the readers aren't).
+
+```
+python dev/production/tools/tdx_zip_to_csx.py <project.zip | folder> [more.zip ...] [--raw-only]
+```
+
+- A folder argument is scanned recursively for project zips (non-project zips are skipped by a
+  manifest+survey.sql sniff). Outputs land next to each zip: `<survey>_recovered.csx` and — via an
+  automatic `preprocess_tdx_csx.py` pass — `<survey>_recovered_pp.csx`, the one to import.
+- **No-typing path:** `recover_tdx.bat` (a copy lives in the TDX handoff folder) — double-click to
+  process every zip in that folder, or drag zips onto it. Its sibling **`preprocess_tdx.bat`** does
+  the same for the normal (non-recovery) flow: double-click = preprocess every *raw* TopoDroid csx
+  in the folder tree (sniffed by `creatid="TopoDroid"` without `creat_postprocessed`; `_pp.csx`
+  outputs and post-import saves skipped), or drag csx files onto it. Both .bats hold an absolute
+  repo path; update them if the repo moves. `preprocess_tdx_csx.py` itself now also accepts
+  multiple files or a folder argument.
+- `parse_tdr.py FILE.tdr [--items] [--json out]` is the underlying all-version `.tdr` binary reader
+  (also a standalone diagnostic: proves whether a sketch file is intact).
+- Only project zips work as input — TopoDroid's "export bundle" zips (csx/dxf/csv collections)
+  contain no tdr/sql and are rejected. Multi-plot surveys: only the first plan + first profile plot
+  are converted (matches TopoDroid's own csx export).
+
+---
 
 `inspect_survey.py` is the Stage 0 tool from [dev/reference/mcp-blueprint.md](../../reference/mcp-blueprint.md):
 a **read-only** command-line inspector for cSurvey `.csz` / `.csx` files. It needs no build, no

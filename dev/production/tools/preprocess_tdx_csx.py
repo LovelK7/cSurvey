@@ -38,7 +38,13 @@ unless --force; original symbol name is preserved in the item's `options`
 string as `tdxpp:<name>` for audit.
 
 Usage:
-  python dev/tools/preprocess_tdx_csx.py INPUT.csx [-o OUTPUT.csx] [--force]
+  python dev/production/tools/preprocess_tdx_csx.py INPUT.csx [more.csx ...] [-o OUTPUT.csx] [--force]
+  python dev/production/tools/preprocess_tdx_csx.py FOLDER          # every raw TopoDroid csx under it
+
+A FOLDER argument is scanned recursively for raw TopoDroid .csx files (creatid="TopoDroid",
+no creat_postprocessed); *_pp.csx outputs and post-import saves are skipped automatically.
+No-typing path: preprocess_tdx.bat in the TDX handoff folder (double-click = scan that folder;
+or drag .csx files onto it).
 """
 
 import argparse
@@ -268,36 +274,17 @@ def process_item(item, stats, warnings):
             process_item(sub, stats, warnings)
 
 
-def main(argv=None):
-    ap = argparse.ArgumentParser(
-        description="Pre-process a raw TopoDroid .csx so its symbols survive "
-                    "the cSurvey import (see dev/docs/tdx-symbol-matrix.md).")
-    ap.add_argument("input", help="raw TopoDroid .csx")
-    ap.add_argument("-o", "--out",
-                    help="output path (default: <input>_pp.csx)")
-    ap.add_argument("--force", action="store_true",
-                    help="overwrite an existing output file")
-    ap.add_argument("--map", dest="map_file", default=DEFAULT_MAP,
-                    help="mapping file (default: tdx-mapping.json next to "
-                         "this script; built-in defaults if absent)")
-    args = ap.parse_args(argv)
-
-    if os.path.exists(args.map_file):
-        load_mapping(args.map_file)
-        print("mapping: %s" % args.map_file)
-    else:
-        print("mapping: built-in defaults (%s not found)" % args.map_file)
-
-    out = args.out or (os.path.splitext(args.input)[0] + "_pp.csx")
-    if os.path.abspath(out) == os.path.abspath(args.input):
+def process_file(input_path, out, force):
+    out = out or (os.path.splitext(input_path)[0] + "_pp.csx")
+    if os.path.abspath(out) == os.path.abspath(input_path):
         print("ERROR: output must differ from input", file=sys.stderr)
         return 1
-    if os.path.exists(out) and not args.force:
+    if os.path.exists(out) and not force:
         print("ERROR: %s exists (use --force to overwrite)" % out,
               file=sys.stderr)
         return 1
 
-    tree = ET.parse(args.input)
+    tree = ET.parse(input_path)
     root = tree.getroot()
     if root.tag != "csurvey":
         print("ERROR: not a csx file (root <%s>)" % root.tag, file=sys.stderr)
@@ -333,6 +320,76 @@ def main(argv=None):
     for w in warnings:
         print("  ⚠ %s" % w)
     return 0
+
+
+def is_raw_topodroid_csx(path):
+    """Cheap sniff (first 4 KB): creatid="TopoDroid" without creat_postprocessed."""
+    try:
+        with open(path, "rb") as f:
+            head = f.read(4096).decode("utf-8", "replace").lower()
+    except OSError:
+        return False
+    return 'creatid="topodroid"' in head and "creat_postprocessed" not in head
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(
+        description="Pre-process a raw TopoDroid .csx so its symbols survive "
+                    "the cSurvey import (see dev/docs/tdx-symbol-matrix.md).")
+    ap.add_argument("inputs", nargs="+",
+                    help="raw TopoDroid .csx file(s), or a folder to scan "
+                         "recursively for them")
+    ap.add_argument("-o", "--out",
+                    help="output path (default: <input>_pp.csx; single input only)")
+    ap.add_argument("--force", action="store_true",
+                    help="overwrite an existing output file")
+    ap.add_argument("--map", dest="map_file", default=DEFAULT_MAP,
+                    help="mapping file (default: tdx-mapping.json next to "
+                         "this script; built-in defaults if absent)")
+    args = ap.parse_args(argv)
+
+    if os.path.exists(args.map_file):
+        load_mapping(args.map_file)
+        print("mapping: %s" % args.map_file)
+    else:
+        print("mapping: built-in defaults (%s not found)" % args.map_file)
+
+    files = []
+    for a in args.inputs:
+        if os.path.isdir(a):
+            for dirpath, _dirs, names in os.walk(a):
+                for fn in sorted(names):
+                    if not fn.lower().endswith(".csx"):
+                        continue
+                    if fn.lower().endswith("_pp.csx"):
+                        continue
+                    p = os.path.join(dirpath, fn)
+                    if is_raw_topodroid_csx(p):
+                        files.append(p)
+                    else:
+                        print("skipping (not a raw TopoDroid csx): %s" % p)
+        else:
+            files.append(a)
+    if not files:
+        print("nothing to do - no raw TopoDroid .csx found")
+        return 1
+    if args.out and len(files) > 1:
+        print("ERROR: -o only makes sense with a single input", file=sys.stderr)
+        return 1
+
+    failures = 0
+    for p in files:
+        if len(files) > 1:
+            print("=" * 60)
+        try:
+            failures += 1 if process_file(p, args.out, args.force) else 0
+        except Exception as e:
+            failures += 1
+            print("FAILED %s: %s" % (p, e))
+    if len(files) > 1:
+        print("=" * 60)
+        print("%d/%d preprocessed" % (len(files) - failures, len(files)))
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":

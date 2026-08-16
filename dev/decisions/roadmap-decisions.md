@@ -4,7 +4,11 @@ A running record of strategy decisions for the automation goal, and the findings
 
 ---
 
-## 2026-07-26 — Symbol-mapping brief CLOSED; TDX→cSurvey processing is operational
+## 2026-08-16 — TopoDroid 6.4.99 broke the handoff; zip is now the durable interchange, and we can mint csx from it ourselves
+
+TopoDroid 6.4.99-36 shipped two export regressions that cut the phone→cSurvey path: the csx exporter crashes (0-byte file) and its `.tdr` sketches (format bumped at 6.4.88/6.4.96/6.4.98) are **silently discarded** by any older TopoDroid on zip import — the reader returns an empty sketch with no error (`DrawingIO.java:750`), so users see "zip lost my drawings" when nothing was lost. Diagnosis + recovery in [projects/0003-tdx-zip-recovery](../projects/0003-tdx-zip-recovery/brief.md): `tdx_zip_to_csx.py` replays TopoDroid's csx exporter offline from the project zip (survey.sql + tdr), validated on both affected real surveys (geometry exact vs the app's own th2; inspector clean; protocol preprocessor applies unchanged).
+
+**Strategic consequence:** the project **zip** is promoted to the canonical phone artifact — it always contains everything, survives app-version churn, and we no longer depend on the phone's csx exporter working. This also de-risks the planned zip→csx pre-converter from [topodroid-zip-and-csx-format.md](../reference/topodroid/topodroid-zip-and-csx-format.md): it now exists as a working prototype. Pending: user's cSurvey import check, promotion to `production/tools/`, upstream bug report. Headless-driver project renumbered to `0004`.
 
 The [symbol-mapping brief](../projects/0002-tdx-symbol-mapping/brief.md) closed with user sign-off after iterative acceptance on two real surveys. The standing workflow (phone → pre-process → import → post-fix, with a user-owned mapping config and a visual mapping workbench) is documented in **[tdx-processing-protocol.md](../production/tdx-processing-protocol.md)** — the entry point for routine TDX survey processing. Notable engineering finds along the way: cSurvey's per-segment, non-accumulating line-decoration stamping (dense polylines render plain — worked around via post-import spline linetypes; upstream fix candidate), the `water-flow` +90° orientation tweak, glyph-gallery extensibility (signs pack shipped), and the fixed 13-line/6-area import vocabulary. Next frontier unchanged: the **reflection hypothesis** (headless driver beside the installed exe) to automate steps 3–4 of the protocol, then the MCP surface per [mcp-blueprint.md](../reference/mcp-blueprint.md).
 

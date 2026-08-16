@@ -23,8 +23,12 @@
 
 ## The standing protocol (routine survey)
 
-1. **Phone:** draw in TopoDroid preferring green-verdict tools (see workbench); export **one** csx (it contains both plan and profile) into `G:\My Drive\Share\TDX`.
-2. **Pre-process:**
+1. **Phone:** draw in TopoDroid preferring green-verdict tools (see workbench); export **one** csx (it contains both plan and profile) into `G:\My Drive\Share\TDX`. **Also export the project ZIP archive every time** (Survey window → menu → Archive) — since TopoDroid 6.4.99 the zip is the durable artifact: it always carries the full sketch and survives app-version churn (see step 1b).
+
+   **1b. If the csx is missing/0-byte or the sketch vanished (TopoDroid ≥6.4.98 bugs):** regenerate the csx from the project zip — double-click `recover_tdx.bat` in the TDX folder (processes every zip there), or drag specific zips onto it; equivalently `python dev\production\tools\tdx_zip_to_csx.py <zip|folder>`. It writes `<survey>_recovered.csx` **and already runs step 2** (`<survey>_recovered_pp.csx` → continue at step 3). Background + validation: [projects/0003-tdx-zip-recovery](../projects/0003-tdx-zip-recovery/brief.md). Export-bundle zips (csx/dxf/csv collections) are not project archives and are skipped.
+2. **Pre-process:** double-click **`preprocess_tdx.bat`** in the TDX folder (preprocesses every raw
+   TopoDroid csx in the folder tree; `_pp` outputs and post-import saves are skipped automatically),
+   or drag specific `.csx` files onto it. Terminal equivalent (takes files or a folder):
    `python dev\production\tools\preprocess_tdx_csx.py "G:\My Drive\Share\TDX\<survey>.csx"`
    → `<survey>_pp.csx` + a report; read the ⚠ warnings (they list what will degrade).
 3. **Import:** open `<survey>_pp.csx` in cSurvey (fix-up chain + therion calculation run automatically), then **Save As** your working file.

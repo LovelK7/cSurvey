@@ -198,12 +198,15 @@ Everything Java `DataOutputStream` big-endian; strings are `writeUTF` (2-byte le
 | `I` | 4 floats bounding box (left, top, right, bottom), int 0 (no north) | :1258-1263 |
 | `N` | int scrap index | :1265-1266 |
 | `P` (point) | float cx, float cy (scene px), UTF thname, UTF group, float orientation, int scale, int level, int scrap, UTF pointText, UTF options | DrawingPointPath.java:772-800 |
-| `L` (line) | UTF thname, UTF group, byte closed, byte reversed, int outline, int lSide, int level, int scrap, UTF options, int npt, then npt vertex records | DrawingLinePath.java:528-561 |
-| `A` (area) | UTF thname, UTF group, UTF prefix, int areaCnt, … then vertices (same vertex records) | DrawingAreaPath.java:490-504+ |
+| `L` (line) | UTF thname, UTF group, byte closed, byte reversed, int outline, int lSide, int level, int scrap, **int scale (≥604088)**, UTF options, int npt, then npt vertex records | DrawingLinePath.java:528-561; scale gate :125 |
+| `A` (area) | UTF thname, UTF group, UTF prefix, int areaCnt, byte visible, float orientation, int level, int scrap, **int scale (≥604096)**, **UTF options (≥604098)**, int npt, then vertices (same vertex records) | DrawingAreaPath.java:490-504+; gates :207-208 |
 | vertex | float x, float y, byte has_cp; if 1: float x1,y1,x2,y2 (incoming bezier control points, scene px) | LinePoint.java:284-303 |
 | `T`,`U`,`X` | label / user station / special records (see DrawingIO reader) | :613-615 |
 | `F` | end of paths (bbox/autostation extras may follow) | :1277 |
+| `D` | plot info, written right after `F` by phone builds (reader dropped in master): float xoffset, yoffset, azimuth, clino, intercept; UTF start, view, hide, nick. Auto-station `X` records may follow. **Verified against real 602016 and 604098 files 2026-08-16.** | DrawingIO.java:1395-1406 (live multi-scrap writer) |
 | `E` | end of file | :1318 |
+
+⚠ **Version semantics changed at 6.4.98**: the `V` int is now `TDVersion.VERSION_TDR` (604098 — "version where the TDR format last changed"), no longer the app's own code; older writers stamped values like 602016. The reader **silently rejects any tdr with `V` greater than its own `VERSION_TDR`** (`DrawingIO.java:750`, `return false` → empty sketch, no error) — this is why sketches "vanish" when a 6.4.99 zip is imported by an older TopoDroid. Per-field version gates above make old files readable by new apps; the reverse direction is a hard wall. Recovery tooling built on this spec: [projects/0003-tdx-zip-recovery](../../projects/0003-tdx-zip-recovery/brief.md) (`production/tools/parse_tdr.py`, `tdx_zip_to_csx.py`).
 
 To turn a tdr path into csx `<points data>`: `world = (scene − (100,120)) / 20`, flatten bezier segments (csx has no control points in this encoding — TopoDroid itself samples them at `TDSetting.getBezierStep()`, DrawingPointLinePath.java:825-862), emit `%.2f` pairs with `B` after the first.
 
