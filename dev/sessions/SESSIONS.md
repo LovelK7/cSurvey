@@ -10,6 +10,34 @@ strategy → `decisions/`, per-task detail → `projects/NNNN/log.md`, chronolog
 
 ---
 
+### 2026-08-16 (3) — slope-line spline fix diagnosed; STEP 4 made drag-drop + dumb-proofed (agent) ✅
+
+- **Did:** user reported imported **slope** lines showing straight (decorations hidden) until manually
+  switched to Splines. Diagnosis: already exactly what `fix_imported_linetypes.py`
+  (`spline_linetypes:true`) does — slope is a plain `cItemFreeHandLine` (`type=1`, `linetype=0`,
+  [cImportTopoDroidHelper.vb:218](../../cSurveyPC/cImportTopoDroidHelper.vb#L218)) caught by the blanket
+  rule; verified on rupe files (step-02b `linetype=0` → step-04b `linetype=1`, all 20 lines). Real gap
+  = user **skips step 4** because the routine was unclear (cryptic `_pp`/`_lt` suffixes, "drag onto"
+  unexplained, hidden "must Save As .csx" trap). Dumb-proofed the whole thing:
+  - `fix_imported_linetypes.py`: now accepts **`.csz` OR `.csx`** (rewrites the zip's `_data.xml`
+    in place, all other entries byte-preserved — kills the save-as-csx trap), **BLOCKS** a
+    not-yet-imported (flat `<plan>/<item>`, no `<layers>`) file with plain instructions, reports
+    "nothing to do", takes multiple dragged files (skips `_lt`).
+  - New **`fix_tdx.bat`** + runtime STEP banners/footers added to all three bats (fixed a batch
+    `->`-as-redirection bug that ate footer lines + created stray files).
+  - New **`READ ME FIRST - process a survey.txt`** — jargon-free numbered checklist (drag-drop,
+    suffix glossary, black-window-message decoder). Copied into the TDX folder.
+  - Protocol step 4 + both READMEs updated; `.csz` accepted; guide linked.
+- **Result:** import the `_pp` → draw in the `_lt`, one double-click per step, wrong-step files
+  refuse themselves. All paths tested (csx+csz round-trip w/ asset preservation, blocker, no-op,
+  batch, bat execution). Honest limit: a bat still needs *remembering* — the zero-step cure is the
+  parked upstream `ConvertItem` change (emit Splines at import).
+- **Evidence:** `production/tools/{fix_imported_linetypes.py,fix_tdx.bat,preprocess_tdx.bat,
+  recover_tdx.bat,READ ME FIRST - process a survey.txt}`, `tdx-processing-protocol.md` step 4,
+  `production/README.md`, `tools/README.md`. TDX-folder copies synced.
+- **Next:** if forgetting persists, do the upstream `ConvertItem` spline change when the DevExpress
+  build is available (already listed as an upstream fix candidate).
+
 ### 2026-08-16 (2) — recovery accepted; project 0003 promoted and CLOSED (agent) ✅
 
 - **Did:** user confirmed the recovered csx imports correctly in cSurvey → Phase 3/4 executed:

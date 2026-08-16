@@ -23,6 +23,8 @@
 
 ## The standing protocol (routine survey)
 
+> **Non-technical operator?** The step-by-step, jargon-free version lives beside the tools as **`READ ME FIRST - process a survey.txt`** (also copied into the TDX folder). It explains drag-and-drop, the `_pp`/`_lt` name endings, and what each black-window message means. The rule in one line: **import the `_pp` file → draw in the `_lt` file.**
+
 1. **Phone:** draw in TopoDroid preferring green-verdict tools (see workbench); export **one** csx (it contains both plan and profile) into `G:\My Drive\Share\TDX`. **Also export the project ZIP archive every time** (Survey window → menu → Archive) — since TopoDroid 6.4.99 the zip is the durable artifact: it always carries the full sketch and survives app-version churn (see step 1b).
 
    **1b. If the csx is missing/0-byte or the sketch vanished (TopoDroid ≥6.4.98 bugs):** regenerate the csx from the project zip — double-click `recover_tdx.bat` in the TDX folder (processes every zip there), or drag specific zips onto it; equivalently `python dev\production\tools\tdx_zip_to_csx.py <zip|folder>`. It writes `<survey>_recovered.csx` **and already runs step 2** (`<survey>_recovered_pp.csx` → continue at step 3). Background + validation: [projects/0003-tdx-zip-recovery](../projects/0003-tdx-zip-recovery/brief.md). Export-bundle zips (csx/dxf/csv collections) are not project archives and are skipped.
@@ -31,10 +33,11 @@
    or drag specific `.csx` files onto it. Terminal equivalent (takes files or a folder):
    `python dev\production\tools\preprocess_tdx_csx.py "G:\My Drive\Share\TDX\<survey>.csx"`
    → `<survey>_pp.csx` + a report; read the ⚠ warnings (they list what will degrade).
-3. **Import:** open `<survey>_pp.csx` in cSurvey (fix-up chain + therion calculation run automatically), then **Save As** your working file.
-4. **Post-fix:**
-   `python dev\production\tools\fix_imported_linetypes.py <saved>.csx`
-   → `<saved>_lt.csx`; open that — it is the finished import (decorated lines, sizes, water brush). Continue mapping work in cSurvey from here.
+3. **Import:** open `<survey>_pp.csx` in cSurvey (fix-up chain + therion calculation run automatically), then **Save As** your working file (either save type — `.csz` or `.csx` — is fine).
+4. **Post-fix (do it right after Save As, *before* you start mapping — else lines stay straight):**
+   drag your saved working file onto **`fix_tdx.bat`** in the TDX folder (accepts `.csz` **or** `.csx`, one or more files), or
+   `python dev\production\tools\fix_imported_linetypes.py <saved>.csz`
+   → `<saved>_lt.<same ext>`; **open that one and do all mapping in it** — it is the finished import (decorated lines, sizes, water brush). This is what flips imported slope/gradient/etc. lines from *Line style: Straight line* (decorations hidden) to *Splines* so their graphics render; cSurvey stamps decorations per straight segment and only spline lines take the curve branch. Skipping this step is why decorated lines show up plain. The fixer **blocks** (with instructions) if you hand it a not-yet-imported file, and is safe to re-run.
 5. **Optional:** `inspect_survey.py --json` snapshots before/after any step for diffable ground truth (protocol: [pipeline-a-instrumented-run.md](methods/instrumented-run.md)).
 
 **Tuning the mapping:** edit `dev/production/tools/tdx-mapping.json` directly, or visually — `python dev\production\tools\make_signs_catalog.py`, open `tdx-mapping-workbench.html` (+ `cs-targets.html` side by side), type target numbers (`105 r`, `12 o90`, `label:!`, `leave`), export, replace the json. Sizes/water/splines live in the json's `postimport` section. Re-run steps 2–4 after changes.

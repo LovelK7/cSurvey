@@ -1,0 +1,104 @@
+==================================================================
+ HOW TO TURN A TOPODROID SURVEY INTO A cSURVEY MAP
+ A simple, do-this-then-that checklist. Follow it top to bottom.
+==================================================================
+
+You will use the three ".bat" files that sit in this same folder:
+
+   preprocess_tdx.bat   (STEP 2)
+   fix_tdx.bat          (STEP 4)
+   recover_tdx.bat      (STEP 1b - only if something is broken)
+
+Each one is safe to double-click or to drag files onto. When it
+finishes it leaves a black window open with a message. READ THAT
+MESSAGE - it tells you if it worked and what to do next. Press any
+key (or close the window) when you have read it.
+
+
+------------------------------------------------------------------
+ WHAT DOES "DRAG AND DROP" MEAN?
+------------------------------------------------------------------
+1. Open the folder in Windows Explorer so you can see the file.
+2. Point the mouse at the file, press and HOLD the left button.
+3. Move the mouse (still holding) until it is over the .bat icon.
+4. Let go of the button. The .bat starts, using that file.
+You can select several files first and drag them all together.
+
+
+------------------------------------------------------------------
+ THE STEPS
+------------------------------------------------------------------
+
+STEP 1 - ON THE PHONE (TopoDroid)
+  * Draw your sketch.
+  * Export ONE .csx file into this TDX folder (it holds plan AND
+    profile together).
+  * ALSO export the project ZIP every time (Survey menu > Archive).
+    You may never need it, but it is your safety net (see STEP 1b).
+
+STEP 1b - ONLY IF THE .csx IS BROKEN
+  Do this ONLY if: the .csx is missing, is 0 bytes, or opens with the
+  sketch gone. Otherwise SKIP to STEP 2.
+  * Drag the project .zip onto  recover_tdx.bat
+  * It makes  <survey>_recovered_pp.csx  -> use that in STEP 3, and
+    skip STEP 2 (recovery already did it).
+
+STEP 2 - PREPARE THE FILE (on the computer)
+  * Drag your phone .csx onto  preprocess_tdx.bat
+    (or just double-click it to do every phone .csx in the folder).
+  * It makes a new file next to it whose name ends in  _pp
+    Example:  cave.csx  ->  cave_pp.csx
+  * Read any WARNING lines - they tell you which drawn symbols will
+    not carry over.
+
+STEP 3 - IMPORT INTO cSURVEY
+  * Start cSurvey.
+  * Open the  _pp  file (the one from STEP 2).  <-- open the _pp one!
+  * cSurvey imports and calculates automatically.
+  * Choose  File > Save As  and save your working file. Any name is
+    fine. Either save type (.csz or .csx) is fine.
+
+STEP 4 - FINISH THE IMPORT  (DO THIS BEFORE YOU DRAW ANYTHING)
+  * Drag the file you just saved in STEP 3 onto  fix_tdx.bat
+  * It makes a new file next to it whose name ends in  _lt
+    Example:  cave_work.csz  ->  cave_work_lt.csz
+  * In cSurvey, OPEN THAT  _lt  FILE and do ALL your drawing in it.
+
+  WHY THIS STEP EXISTS: when cSurvey imports phone lines it makes them
+  "Straight line", and in that mode slope/gradient/etc. lines do NOT
+  show their little arrows and ticks. STEP 4 switches them to
+  "Splines", which makes the decorations appear. If you skip STEP 4
+  and start drawing in the STEP 3 file, those lines will look plain -
+  that is the #1 thing people get wrong.
+
+
+------------------------------------------------------------------
+ THE NAME ENDINGS (so the file name tells you where you are)
+------------------------------------------------------------------
+   (no ending)  the raw file from the phone
+   _pp          PREPARED - this is the one you IMPORT (STEP 3)
+   _recovered   rebuilt from the zip (STEP 1b)
+   _lt          FINISHED - this is the one you OPEN AND DRAW IN (STEP 4)
+
+Simple rule:  IMPORT the _pp file  ->  DRAW IN the _lt file.
+
+
+------------------------------------------------------------------
+ IF THE BLACK WINDOW SAYS...
+------------------------------------------------------------------
+ "OK ... _lt ..."   Success. Open the _lt file in cSurvey and draw.
+
+ "BLOCKED"          You dragged a file onto fix_tdx.bat that has not
+                    been imported into cSurvey yet (e.g. a _pp file).
+                    Do STEP 3 first (import it, Save As), then drag
+                    THAT saved file onto fix_tdx.bat.
+
+ "WARNING"          Not fatal. Usually "this drawn symbol won't carry
+                    over". The step still finished.
+
+ "ERROR"            Read the sentence after it - it says what to fix
+                    (e.g. the file could not be read).
+
+You can re-run any step safely; it never changes your original file,
+it always makes a new one.
+==================================================================
